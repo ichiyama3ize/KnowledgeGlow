@@ -1,31 +1,29 @@
 version: '3.8'
 
 services:
-  # Go メインアプリケーション
-  go-app:
+  # Go プロキシサーバー
+  go-proxy:
     build:
       context: ./go-app
       dockerfile: Dockerfile
-    container_name: knowledge-go-app
+    container_name: knowledge-go-proxy
     ports:
-      - "8080:8080"
+      - "50575:50575"
     environment:
-      - AI_SERVICE_URL=http://python-ai:8001
-      - DATABASE_PATH=/app/data/knowledge.db
-      - LOG_LEVEL=INFO
-      - PORT=8080
+      - GO_PORT=50575
+      - PYTHON_PORT=59147
+      - WEBUI_PORT=8000
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
-      - ./config:/app/config
-      - ./exports:/app/exports
     depends_on:
       - python-ai
+      - web-ui
     networks:
       - knowledge-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:50575/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -38,13 +36,11 @@ services:
       dockerfile: Dockerfile
     container_name: knowledge-python-ai
     ports:
-      - "8001:8001"
+      - "59147:59147"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
-      - CHROMA_DB_PATH=/app/data/chroma_db
-      - LOG_LEVEL=INFO
-      - PORT=8001
+      - PORT=59147
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
@@ -53,7 +49,29 @@ services:
       - knowledge-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/ai/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:59147/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Web UIサービス
+  web-ui:
+    build:
+      context: ./web-ui
+      dockerfile: Dockerfile
+    container_name: knowledge-web-ui
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    volumes:
+      - ./web-ui:/app
+    networks:
+      - knowledge-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3

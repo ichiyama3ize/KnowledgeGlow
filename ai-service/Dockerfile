@@ -39,11 +39,11 @@ COPY . .
 RUN mkdir -p /app/data /app/logs
 
 # ポートの公開
-EXPOSE 8001
+EXPOSE 59147
 
 # ヘルスチェック
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:8001/ai/health || exit 1
+  CMD curl -f http://localhost:59147/health || exit 1
 
 # アプリケーションの実行
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "59147"]
