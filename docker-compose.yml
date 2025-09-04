@@ -1,14 +1,13 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  # Go プロキシサーバー
-  go-proxy:
+  go-app:
     build:
       context: ./go-app
       dockerfile: Dockerfile
     container_name: knowledge-go-proxy
     ports:
-      - "50575:50575"
+      - "50576:50575"
     environment:
       - GO_PORT=50575
       - PYTHON_PORT=59147
@@ -36,7 +35,7 @@ services:
       dockerfile: Dockerfile
     container_name: knowledge-python-ai
     ports:
-      - "59147:59147"
+      - "59148:59147"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - CLAUDE_API_KEY=${CLAUDE_API_KEY}
@@ -118,12 +117,12 @@ services:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--storage.tsdb.retention.time=200h'
-      - '--web.enable-lifecycle'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--storage.tsdb.retention.time=200h"
+      - "--web.enable-lifecycle"
     networks:
       - knowledge-network
     restart: unless-stopped
@@ -135,7 +134,7 @@ services:
     image: grafana/grafana:latest
     container_name: knowledge-grafana
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
